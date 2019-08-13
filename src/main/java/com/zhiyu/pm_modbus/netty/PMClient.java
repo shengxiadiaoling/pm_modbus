@@ -23,7 +23,7 @@ public class PMClient {
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
             b.channel(NioSocketChannel.class);
-            b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,2000);
+            b.option(ChannelOption.CONNECT_TIMEOUT_MILLIS,10000);
 //            b.option(ChannelOption.SO_KEEPALIVE, true);
             b.handler(pmInitializer);
 

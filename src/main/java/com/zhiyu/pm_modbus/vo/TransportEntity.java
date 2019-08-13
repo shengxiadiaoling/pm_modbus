@@ -1,7 +1,9 @@
 package com.zhiyu.pm_modbus.vo;
 
 
-public class TransportEntity {
+import java.io.Serializable;
+
+public class TransportEntity implements Serializable {
     private String pmMessage; 	// pm发送的时间
     private String ip; 			// 发送者IP
     private String receiveTime; // 接收pm的时间

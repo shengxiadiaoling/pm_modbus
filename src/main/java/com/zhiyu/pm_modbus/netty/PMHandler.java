@@ -27,6 +27,7 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelRead0(ChannelHandlerContext ctx, String msg){
+        ctx.channel().remoteAddress();
         messageHandle(msg);
         ctx.close();
     }
@@ -60,7 +61,9 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
         for (int i = 0; i < data.length; i++) {
             data[i] = (short) (((tmp[j++] & 0xFF) << 8) | (tmp[j++] & 0xFF));
         }
-        rabbitmqProducer.send(buildMessage(data));
+        String re = buildMessage(data);
+        System.out.println(re);
+        rabbitmqProducer.send(re);
     }
 
     /**
@@ -68,15 +71,15 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
      */
     private String buildMessage(int[] data) {
         //STX05801|HN|V0.1|123456|+29.6|50.0|N|57.00|N|55.30|0.00|0|123456
-        return "STX00001|DT|V1.0|" + "62599" +//终端序列号
-                data[2] / 10 +//温度值
-                data[3] / 10 +//湿度值
-                data[0] +//PM2.5值
-                data[1] +//PM10值
-                "N" +//雨量值
-                data[6] / 10 +//噪声
-                data[4] / 10 +//风速值
-                getWindDirection(data[5]) +//风向
+        return "STX00001|DT|V1.0|" + "62599" + "|" +//终端序列号
+                data[2] / 10 + "|" +//温度值
+                data[3] / 10 + "|" +//湿度值
+                data[0] + "|" +//PM2.5值
+                data[1] + "|" +//PM10值
+                "N" + "|" +//雨量值
+                data[6] / 10 + "|" +//噪声
+                data[4] / 10 + "|" +//风速值
+                getWindDirection(data[5]) + "|" +//风向
                 "62599";//设备唯一的编号
     }
 
