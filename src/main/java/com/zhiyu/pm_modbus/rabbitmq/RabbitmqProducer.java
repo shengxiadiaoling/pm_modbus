@@ -2,7 +2,7 @@ package com.zhiyu.pm_modbus.rabbitmq;
 
 import com.zhiyu.pm_modbus.constants.QueueConstants;
 import com.zhiyu.pm_modbus.util.DateUtil;
-import com.zhiyu.pm_modbus.vo.TransportEntity;
+import com.zhiyu.pmproject.vo.TransportEntity;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
