@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.zhiyu.pm_modbus.mapper.InterfaceMapper">
+    <select id="getDevices" resultType="com.zhiyu.pm_modbus.vo.ModBusDeviceVO">
+        SELECT
+            td.device_no,
+            td.device_ip,
+            td.`port`
+        FROM
+            pm_device pd,
+            third_party_device td
+        WHERE
+            pd.device_no = td.device_no
+            AND td.type = 'modbus'
+    </select>
+</mapper>

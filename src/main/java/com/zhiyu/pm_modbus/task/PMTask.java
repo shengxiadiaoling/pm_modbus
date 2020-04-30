@@ -8,6 +8,9 @@ import com.zhiyu.pm_modbus.util.DeviceNoMapUtil;
 import com.zhiyu.pm_modbus.util.HttpClientUtil;
 import com.zhiyu.pm_modbus.util.JSONUtil;
 import com.zhiyu.pm_modbus.vo.InterfaceJsonResultVO;
+import com.zhiyu.pm_modbus.vo.ModBusDeviceVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,51 +25,33 @@ import java.util.List;
 @Component
 public class PMTask {
     private PMClient pmClient;
-    private HttpClientUtil httpClientUtil;
     private InterfaceService interfaceService;
+    private final static Logger log = LoggerFactory.getLogger(PMTask.class);
 
     public PMTask(PMClient pmClient,
-                  HttpClientUtil httpClientUtil,
                   InterfaceService interfaceService) {
         this.pmClient = pmClient;
-        this.httpClientUtil = httpClientUtil;
         this.interfaceService = interfaceService;
     }
-    @Async
+
     @Scheduled(fixedDelay = 1000 * 60 * 5)
-    public void getPMData() {
-        System.out.println("Task that gets pm data via modbus starts" + new Date());
+    public void getPmData() {
         /*
-         * 1、获取蓝天卫士接口地址列表
-         * 2、请求蓝天卫士接口获得modbus设备接口和ip列表
-         * 3、请求接口获取host port 数据
-         * 4、将host和端口封装成map
+         * 1、获取所有的modbus设备信息（ip，port）
+         * 2、将设备号和ip端口放入map（便于后续通过ip端口获取设备号）
+         * 2、获取modbus设备数据
          */
-        List<String> modbus = interfaceService.getInterfaceUrlByType("modbus");
-        List<InterfaceJsonResultVO> list = new ArrayList<>();
-        modbus.forEach(url -> {
-            String result = httpClientUtil.doRequest(url, null, "post");
-            List<InterfaceJsonResultVO> results = JSONUtil.basicParse(result, "success", InterfaceJsonResultVO.class);
-            if (results != null) {
-                list.addAll(results);
+        List<ModBusDeviceVO> devices = interfaceService.getDevices();
+        if (devices.size() > 0) {
+            if (DeviceNoMapUtil.size() > 3 * devices.size()) {
+                /*
+                 * 如果缓存的设备过多则清空重新缓存
+                 */
+                DeviceNoMapUtil.clear();
             }
-        });
-        //临时存储每个设备与设备号的对应map
-        DeviceNoMapUtil.clear();
-        DeviceNoMapUtil.mapper(list);
-        if (list.size() > 0 ) {
-            pmClient.run(list);
+            DeviceNoMapUtil.mapper(devices);
+            pmClient.run(devices);
         }
-        System.out.println("end!");
-        //释放临时存储的map资源
-        /*List<InterfaceJsonResultVO> list = new ArrayList<>();
-        for (int i = 0; i < 1000; i++) {
-            InterfaceJsonResultVO vo1 = new InterfaceJsonResultVO();
-            vo1.setDevicePort(9163);
-            vo1.setDeviceIp("127.0.0.1");
-            list.add(vo1);
-        }
-        pmClient.run(list);*/
     }
 
 }

@@ -8,6 +8,8 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.net.SocketAddress;
@@ -17,6 +19,7 @@ import java.util.Date;
 @ChannelHandler.Sharable
 public class PMHandler  extends SimpleChannelInboundHandler<String> {
     //发送的验证
+    private static final Logger LOG = LoggerFactory.getLogger(PMHandler.class);
     private byte[] cmd_read = {0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x01, 0x03, 0x00, 0x3C, 0x00, 0x07};
 //    private byte[] cmd_write = {0x00, 0x00, 0x00, 0x00, 0x00, 0x77, 0x01, 0x10, 0x00, 0x01, 0x00, 0x77, 0x77};
     private static final int DATA_LENGTH = 7;
@@ -32,18 +35,21 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
     public void channelRead0(ChannelHandlerContext ctx, String msg){
         SocketAddress socketAddress = ctx.channel().remoteAddress();
         String remoteAddress = RegexUtil.match(socketAddress.toString(),PATTERN);
-        System.out.println(remoteAddress);
+//        System.out.println(remoteAddress);
 //        System.out.println(msg);
-        messageHandle(msg,remoteAddress);
+        if (remoteAddress != null) {
+            messageHandle(msg,remoteAddress);
+        }
         ctx.close();
     }
 
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
+        LOG.info("连接成功" + new Date());
         ByteBuf buf = Unpooled.buffer(cmd_read.length);
         buf.writeBytes(cmd_read);
-        System.out.println("connect successfully!" + new Date());
+//        LOG.info("connect successfully!" + new Date());
         ctx.writeAndFlush(buf);
     }
 
@@ -54,7 +60,7 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
     private void messageHandle(String msg, String remoteAddress) {
         byte[] tmp = msg.getBytes();
         if (tmp.length != 23) {
-            System.out.println("message error!");
+            LOG.info("message error:" + msg);
             return;
         }
         int[] data = new int[DATA_LENGTH];
@@ -63,8 +69,8 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
             data[i] = (short) (((tmp[j++] & 0xFF) << 8) | (tmp[j++] & 0xFF));
         }
         String re = buildMessage(data,remoteAddress);
-        System.out.println(re);
-        rabbitmqProducer.send(re);
+        LOG.info("send message: " + re);
+//        rabbitmqProducer.send(re);
     }
 
     @Override
