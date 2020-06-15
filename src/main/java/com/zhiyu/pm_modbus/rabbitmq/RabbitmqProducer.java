@@ -11,7 +11,7 @@ import java.util.Date;
 @Component
 public class RabbitmqProducer {
 
-        private RabbitTemplate rabbitTemplate;
+        private final RabbitTemplate rabbitTemplate;
         public RabbitmqProducer(RabbitTemplate rabbitTemplate) {
             this.rabbitTemplate = rabbitTemplate;
         }

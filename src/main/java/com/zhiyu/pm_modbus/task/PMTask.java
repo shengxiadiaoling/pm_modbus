@@ -42,6 +42,12 @@ public class PMTask {
          * 2、获取modbus设备数据
          */
         List<ModBusDeviceVO> devices = interfaceService.getDevices();
+        /*List<ModBusDeviceVO> devices = new ArrayList<>();
+        ModBusDeviceVO vo = new ModBusDeviceVO();
+        vo.setDeviceIp("10.12.74.240");
+        vo.setPort(502);
+        vo.setDeviceNo("test");
+        devices.add(vo);*/
         if (devices.size() > 0) {
             if (DeviceNoMapUtil.size() > 3 * devices.size()) {
                 /*

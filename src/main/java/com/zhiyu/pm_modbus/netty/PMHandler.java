@@ -70,7 +70,7 @@ public class PMHandler  extends SimpleChannelInboundHandler<String> {
         }
         String re = buildMessage(data,remoteAddress);
         LOG.info("send message: " + re);
-//        rabbitmqProducer.send(re);
+        rabbitmqProducer.send(re);
     }
 
     @Override
